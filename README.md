@@ -1,1 +1,2 @@
-# weight-constrained-shortest-distance
+# wcShortestDistance
+Weight constrained shortest distance
