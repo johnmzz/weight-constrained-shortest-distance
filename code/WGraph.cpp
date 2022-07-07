@@ -4,6 +4,7 @@ WGraph::WGraph() {
     graph = AdjList();
     hgraph = vector<set<uint32_t>>();
     wlist = AdjList();
+    thresh = 0;
     nsize = 0;
     msize = 0;
     wsize = 0;
@@ -17,23 +18,23 @@ WGraph::WGraph() {
     labeling_bit = vector<vector<uint32_t>>();
 }
 
-WGraph::WGraph(string path, string graph, bool isBin) {
+WGraph::WGraph(string path, bool isBin) {
     if (isBin) {
-        ifstream in(path + graph + string("/") + string("graph.bin"), ios_base::binary);
+        ifstream in(path + string("/") + string("graph.bin"), ios_base::binary);
         if (!in) {
             cout << "Cannot open graph edgelist!\n"
                 << endl;
-            cout << path + graph + string("/") + string("graph.bin") << endl;
+            cout << path + string("/") + string("graph.bin") << endl;
             exit(0);
         }
         read_graph(in);
     }
     else {
-        ifstream in(path + graph + string("/") + string("graph.txt"));
+        ifstream in(path + string("/") + string("graph.txt"));
         if (!in) {
             cout << "Cannot open graph edgelist!\n"
                 << endl;
-            cout << path + graph + string("/") + string("graph.txt") << endl;
+            cout << path + string("/") + string("graph.txt") << endl;
             exit(0);
         }
         read_edgelist(in);
@@ -864,7 +865,7 @@ void WGraph::build_naive_index() {
     cout << "build index: " << (float)(end - start) / CLOCKS_PER_SEC << " s" << endl;
 }
 
-void WGraph::build_index(string type, int threshold) {
+void WGraph::build_index(string type, string graph_type) {
     labeling_v = vector<vector<uint32_t>>(nsize);
     offset = vector<vector<uint32_t>>(nsize);
     labeling_d = vector<vector<uint16_t>>(nsize);
@@ -879,6 +880,7 @@ void WGraph::build_index(string type, int threshold) {
     boost::dynamic_bitset<> updated = boost::dynamic_bitset<>(nsize);
     vector<uint8_t> visited_r = vector<uint8_t>(nsize, 0);
     boost::dynamic_bitset<> this_visited_flag = boost::dynamic_bitset<>(nsize);
+    if (graph_type == "social") thresh = 10;
 
     clock_t start, end;
     start = clock();
@@ -897,7 +899,7 @@ void WGraph::build_index(string type, int threshold) {
     }
     if (type == "wc-index-plus") {
         for (uint32_t u = 0; u < nsize; u++) {
-            if (u < (int)(nsize*threshold/100)) {
+            if (u < (int)(nsize*thresh/100)) {
                 vertex_prioritized_indexing_plus(u, updated, visited_r, this_visited_flag);
             }
             else {
